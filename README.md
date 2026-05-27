@@ -1,2 +1,0 @@
-# grower-foliar
-leads experience
