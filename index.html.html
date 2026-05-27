@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análise Foliar | Grower</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1a5c3a;
+    --verde-claro: #2d7a50;
+    --verde-bg: #f0f7f3;
+    --verde-borda: #c8e6d5;
+    --amarelo: #e8a020;
+    --vermelho: #d94040;
+    --azul: #2563a8;
+    --cinza: #6b7280;
+    --cinza-claro: #f5f5f3;
+    --texto: #1a1a1a;
+    --borda: #e2e8e4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #fafaf8;
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  /* TOPO */
+  .topo {
+    background: var(--verde);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-grower {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo-grower span { color: #7dd3a8; }
+  .topo-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-left: auto;
+  }
+
+  /* CONTAINER */
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ETAPAS */
+  .etapa { display: none; }
+  .etapa.ativa { display: block; }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 32px;
+  }
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--cinza);
+  }
+  .step-item.done { color: var(--verde); }
+  .step-item.active { color: var(--verde); font-weight: 600; }
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--borda);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    color: var(--cinza);
+    flex-shrink: 0;
+  }
+  .step-item.done .step-num { background: var(--verde); color: #fff; }
+  .step-item.active .step-num { background: var(--verde); color: #fff; }
+  .step-sep { flex: 1; height: 1px; background: var(--borda); margin: 0 8px; }
+
+  /* HERO */
+  .hero { margin-bottom: 28px; }
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--verde);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .hero p {
+    font-size: 15px;
+    color: var(--cinza);
+    line-height: 1.6;
+  }
+  .tag-safra {
+    display: inline-block;
+    background: var(--verde-bg);
+    color: var(--verde);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--verde-borda);
+    margin-bottom: 14px;
+    letter-spacing: 0.3px;
+  }
+
+  /* CARD */
+  .card {
+    background: #fff;
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--texto);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .icone {
+    width: 28px; height: 28px;
+    background: var(--verde-bg);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* FORM */
+  .campo-grupo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .campo-grupo.full { grid-template-columns: 1fr; }
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cinza);
+  }
+  input, select {
+    height: 40px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    padding: 0 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    background: #fff;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input:focus, select:focus { border-color: var(--verde); }
+  input.erro, select.erro { border-color: var(--vermelho); }
+
+  /* CONSENTIMENTO */
+  .consentimento {
+    background: var(--cinza-claro);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .consentimento input[type="checkbox"] {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    accent-color: var(--verde);
+    cursor: pointer;
+  }
+  .consentimento label {
+    font-size: 13px;
+    color: var(--cinza);
+    line-height: 1.5;
+    cursor: pointer;
+    font-weight: 400;
+  }
+  .consentimento label strong { color: var(--verde); font-weight: 600; }
+
+  /* GANHOS */
+  .ganhos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .ganho-item {
+    background: var(--verde-bg);
+    border: 1px solid var(--verde-borda);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--verde);
+    line-height: 1.5;
+  }
+  .ganho-item strong { display: block; font-size: 12px; color: var(--verde-claro); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* BOTÃO */
+  .btn-principal {
+    width: 100%;
+    height: 48px;
+    background: var(--verde);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.2px;
+  }
+  .btn-principal:hover { background: var(--verde-claro); }
+  .btn-principal:active { transform: scale(0.98); }
+  .btn-principal:disabled { background: #a0b8ac; cursor: not-allowed; }
+
+  /* INPUTS NUTRIENTES */
+  .grid-nutrientes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .campo-nutriente {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .campo-nutriente label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cinza);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .campo-nutriente input {
+    height: 38px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* RESULTADO */
+  .resultado-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .resultado-item {
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid transparent;
+  }
+  .resultado-item .nome-n {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto);
+  }
+  .resultado-item .valor-n {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cinza);
+    margin-left: 6px;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge.baixo { background: #fde8e8; color: #b91c1c; border: 1px solid #fca5a5; }
+  .badge.medio { background: #fef9c3; color: #92400e; border: 1px solid #fde68a; }
+  .badge.adequado { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .badge.elevado { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+  .resultado-item.baixo { background: #fff5f5; border-color: #fecaca; }
+  .resultado-item.medio { background: #fffbeb; border-color: #fde68a; }
+  .resultado-item.adequado { background: #f0fdf4; border-color: #bbf7d0; }
+  .resultado-item.elevado { background: #eff6ff; border-color: #bfdbfe; }
+
+  /* SUMÁRIO */
+  .sumario {
+    background: var(--verde-bg);
+    border: 1px solid var(--verde-borda);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--verde);
+  }
+  .sumario strong { font-weight: 600; }
+
+  /* ENVIANDO */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: var(--cinza);
+    font-size: 14px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border: 2px solid var(--borda);
+    border-top-color: var(--verde);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .erro-msg {
+    font-size: 12px;
+    color: var(--vermelho);
+    margin-top: 4px;
+    display: none;
+  }
+  .erro-msg.visivel { display: block; }
+
+  .aviso-topo {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .aviso-topo.visivel { display: block; }
+
+  @media (max-width: 480px) {
+    .campo-grupo { grid-template-columns: 1fr; }
+    .grid-nutrientes { grid-template-columns: repeat(2, 1fr); }
+    .resultado-grid { grid-template-columns: 1fr; }
+    .ganhos { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <div class="logo-grower">grower<span>.</span></div>
+  <div class="topo-sub">Análise Foliar · Safra 24/25</div>
+</div>
+
+<div class="container">
+
+  <!-- ETAPA 1: CADASTRO -->
+  <div class="etapa ativa" id="etapa-1">
+    <div class="steps">
+      <div class="step-item active">
+        <div class="step-num">1</div>
+        Seus dados
+      </div>
+      <div class="step-sep"></div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        Análise foliar
+      </div>
+      <div class="step-sep"></div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        Resultado
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="tag-safra">Grower · Safra 24/25</div>
+      <h1>Diagnóstico foliar de soja gratuito</h1>
+      <p>Preencha seus dados, insira os valores da sua análise foliar e receba uma interpretação instantânea baseada nas normas Grower para máxima produtividade.</p>
+    </div>
+
+    <div class="ganhos">
+      <div class="ganho-item">
+        <strong>O que você recebe</strong>
+        Interpretação nutricional da sua lavoura com base em níveis críticos calibrados para o Cerrado
+      </div>
+      <div class="ganho-item">
+        <strong>Totalmente gratuito</strong>
+        Sem cadastro de cartão, sem compromisso. Resultado instantâneo após o preenchimento
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><div class="icone">👤</div> Informações pessoais</h2>
+
+      <div class="campo-grupo">
+        <div class="campo">
+          <label for="nome">Nome completo *</label>
+          <input type="text" id="nome" placeholder="Seu nome">
+          <div class="erro-msg" id="erro-nome">Campo obrigatório</div>
+        </div>
+        <div class="campo">
+          <label for="email">E-mail *</label>
+          <input type="email" id="email" placeholder="seu@email.com">
+          <div class="erro-msg" id="erro-email">E-mail inválido</div>
+        </div>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo">
+          <label for="telefone">Telefone / WhatsApp *</label>
+          <input type="tel" id="telefone" placeholder="(65) 99999-9999">
+          <div class="erro-msg" id="erro-telefone">Campo obrigatório</div>
+        </div>
+        <div class="campo">
+          <label for="funcao">Função *</label>
+          <select id="funcao">
+            <option value="">Selecione...</option>
+            <option value="Produtor">Produtor rural</option>
+            <option value="Consultor">Consultor agrônomo</option>
+            <option value="Comercial">Comercial / Revenda</option>
+            <option value="Técnico">Departamento técnico</option>
+            <option value="Pesquisador">Pesquisador</option>
+          </select>
+          <div class="erro-msg" id="erro-funcao">Selecione uma opção</div>
+        </div>
+      </div>
+
+      <div class="campo-grupo">
+        <div class="campo">
+          <label for="estado">Estado *</label>
+          <select id="estado">
+            <option value="">Selecione...</option>
+            <option>MT</option><option>TO</option><option>MA</option><option>BA</option>
+            <option>PI</option><option>GO</option><option>MS</option><option>MG</option>
+            <option>PA</option><option>RO</option><option>Outro</option>
+          </select>
+          <div class="erro-msg" id="erro-estado">Selecione um estado</div>
+        </div>
+        <div class="campo">
+          <label for="municipio">Município *</label>
+          <input type="text" id="municipio" placeholder="Sua cidade">
+          <div class="erro-msg" id="erro-municipio">Campo obrigatório</div>
+        </div>
+      </div>
+
+      <div class="consentimento">
+        <input type="checkbox" id="consentimento">
+        <label for="consentimento">
+          Concordo com o compartilhamento dos meus dados para geração da interpretação nutricional. 
+          <strong>Seus dados serão usados exclusivamente pela equipe Grower.</strong>
+        </label>
+      </div>
+      <div class="erro-msg" id="erro-consentimento" style="margin-top:6px;">É necessário aceitar para continuar</div>
+    </div>
+
+    <button class="btn-principal" onclick="irParaAnalise()">Continuar para análise foliar →</button>
+  </div>
+
+  <!-- ETAPA 2: ANÁLISE FOLIAR -->
+  <div class="etapa" id="etapa-2">
+    <div class="steps">
+      <div class="step-item done">
+        <div class="step-num">✓</div>
+        Seus dados
+      </div>
+      <div class="step-sep"></div>
+      <div class="step-item active">
+        <div class="step-num">2</div>
+        Análise foliar
+      </div>
+      <div class="step-sep"></div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        Resultado
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="tag-safra">Normas Grower · Safra 24/25</div>
+      <h1>Insira os valores da sua análise</h1>
+      <p>Digite os teores foliares da sua lavoura. Use os valores em <strong>g/kg</strong> para macronutrientes e <strong>mg/kg</strong> para micronutrientes (boron, cobre, ferro, manganês, zinco).</p>
+    </div>
+
+    <div class="aviso-topo" id="aviso-campos">Preencha ao menos um nutriente para gerar o diagnóstico.</div>
+
+    <div class="card">
+      <h2><div class="icone">🌿</div> Macronutrientes <span style="font-size:12px;color:var(--cinza);font-weight:400;margin-left:4px">(g/kg)</span></h2>
+      <div class="grid-nutrientes">
+        <div class="campo-nutriente"><label>N</label><input type="number" id="n_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>P</label><input type="number" id="p_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>K</label><input type="number" id="k_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>Ca</label><input type="number" id="ca_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>Mg</label><input type="number" id="mg_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>S</label><input type="number" id="s_val" placeholder="—" step="0.1" min="0"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><div class="icone">⚗️</div> Micronutrientes <span style="font-size:12px;color:var(--cinza);font-weight:400;margin-left:4px">(mg/kg)</span></h2>
+      <div class="grid-nutrientes">
+        <div class="campo-nutriente"><label>B</label><input type="number" id="b_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>Cu</label><input type="number" id="cu_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>Fe</label><input type="number" id="fe_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>Mn</label><input type="number" id="mn_val" placeholder="—" step="0.1" min="0"></div>
+        <div class="campo-nutriente"><label>Zn</label><input type="number" id="zn_val" placeholder="—" step="0.1" min="0"></div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading-envio">
+      <div class="spinner"></div> Gerando diagnóstico e salvando seus dados...
+    </div>
+
+    <button class="btn-principal" id="btn-rodar" onclick="rodarAnalise()">Gerar diagnóstico foliar →</button>
+  </div>
+
+  <!-- ETAPA 3: RESULTADO -->
+  <div class="etapa" id="etapa-3">
+    <div class="steps">
+      <div class="step-item done"><div class="step-num">✓</div> Seus dados</div>
+      <div class="step-sep"></div>
+      <div class="step-item done"><div class="step-num">✓</div> Análise foliar</div>
+      <div class="step-sep"></div>
+      <div class="step-item active"><div class="step-num">3</div> Resultado</div>
+    </div>
+
+    <div class="hero">
+      <div class="tag-safra">Diagnóstico concluído</div>
+      <h1 id="titulo-resultado">Diagnóstico nutricional da sua lavoura</h1>
+      <p style="font-size:14px;color:var(--cinza)">Normas Grower Safra 24/25 · Máxima produtividade</p>
+    </div>
+
+    <div class="sumario" id="sumario-texto"></div>
+
+    <div class="resultado-grid" id="resultado-grid"></div>
+
+    <div class="card" style="background:var(--cinza-claro);border-color:var(--borda)">
+      <p style="font-size:13px;color:var(--cinza);line-height:1.6;">
+        Quer aprofundar o diagnóstico e receber recomendações personalizadas para sua lavoura? 
+        <strong style="color:var(--verde)">A equipe Grower entrará em contato em breve.</strong>
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzC66VAg185FiUB7VP-0fluKEi1s4CjXiT2KRZ8BYUVlXcLxnJFtoW5sDotldpcgW6nPw/exec';
+
+const normas = {
+  N:  { baixo: 38.7, medio_min: 38.7, medio_max: 48.4, adeq_min: 48.4, adeq_max: 55.6, unit: 'g/kg' },
+  P:  { baixo: 2.4,  medio_min: 2.4,  medio_max: 3.6,  adeq_min: 3.6,  adeq_max: 4.5,  unit: 'g/kg' },
+  K:  { baixo: 19.3, medio_min: 19.3, medio_max: 24.8, adeq_min: 24.8, adeq_max: 30.3, unit: 'g/kg' },
+  Ca: { baixo: 6.4,  medio_min: 6.4,  medio_max: 11.3, adeq_min: 11.3, adeq_max: 14.9, unit: 'g/kg' },
+  Mg: { baixo: 3.6,  medio_min: 3.6,  medio_max: 4.0,  adeq_min: 4.0,  adeq_max: 5.1,  unit: 'g/kg' },
+  S:  { baixo: 2.2,  medio_min: 2.2,  medio_max: 3.0,  adeq_min: 3.0,  adeq_max: 3.7,  unit: 'g/kg' },
+  B:  { baixo: 36.1, medio_min: 36.1, medio_max: 46.4, adeq_min: 46.4, adeq_max: 61.9, unit: 'mg/kg' },
+  Cu: { baixo: 7.3,  medio_min: 7.3,  medio_max: 10.1, adeq_min: 10.1, adeq_max: 13.4, unit: 'mg/kg' },
+  Fe: { baixo: 91.4, medio_min: 91.4, medio_max: 130.5,adeq_min: 130.5,adeq_max: 156.7,unit: 'mg/kg' },
+  Mn: { baixo: 42.5, medio_min: 42.5, medio_max: 58.9, adeq_min: 58.9, adeq_max: 78.5, unit: 'mg/kg' },
+  Zn: { baixo: 30.9, medio_min: 30.9, medio_max: 42.9, adeq_min: 42.9, adeq_max: 59.5, unit: 'mg/kg' }
+};
+
+function classificar(nutriente, valor) {
+  const n = normas[nutriente];
+  if (valor < n.baixo) return 'baixo';
+  if (valor < n.adeq_min) return 'medio';
+  if (valor <= n.adeq_max) return 'adequado';
+  return 'elevado';
+}
+
+function labelClasse(c) {
+  return { baixo: 'Baixo', medio: 'Médio', adequado: 'Adequado', elevado: 'Elevado' }[c];
+}
+
+let dadosLead = {};
+
+function validarCampo(id, tipo) {
+  const el = document.getElementById(id);
+  const erro = document.getElementById('erro-' + id);
+  let ok = true;
+  if (tipo === 'email') {
+    ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+  } else if (tipo === 'select') {
+    ok = el.value !== '';
+  } else {
+    ok = el.value.trim() !== '';
+  }
+  el.classList.toggle('erro', !ok);
+  if (erro) erro.classList.toggle('visivel', !ok);
+  return ok;
+}
+
+function irParaAnalise() {
+  let valido = true;
+  valido = validarCampo('nome', 'text') && valido;
+  valido = validarCampo('email', 'email') && valido;
+  valido = validarCampo('telefone', 'text') && valido;
+  valido = validarCampo('funcao', 'select') && valido;
+  valido = validarCampo('estado', 'select') && valido;
+  valido = validarCampo('municipio', 'text') && valido;
+
+  const check = document.getElementById('consentimento');
+  const erroCheck = document.getElementById('erro-consentimento');
+  if (!check.checked) {
+    erroCheck.classList.add('visivel');
+    valido = false;
+  } else {
+    erroCheck.classList.remove('visivel');
+  }
+
+  if (!valido) return;
+
+  dadosLead = {
+    nome: document.getElementById('nome').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    telefone: document.getElementById('telefone').value.trim(),
+    funcao: document.getElementById('funcao').value,
+    estado: document.getElementById('estado').value,
+    municipio: document.getElementById('municipio').value.trim(),
+    timestamp: new Date().toLocaleString('pt-BR')
+  };
+
+  document.getElementById('etapa-1').classList.remove('ativa');
+  document.getElementById('etapa-2').classList.add('ativa');
+  window.scrollTo(0, 0);
+}
+
+function rodarAnalise() {
+  const ids = ['n_val','p_val','k_val','ca_val','mg_val','s_val','b_val','cu_val','fe_val','mn_val','zn_val'];
+  const map  = { n_val:'N', p_val:'P', k_val:'K', ca_val:'Ca', mg_val:'Mg', s_val:'S', b_val:'B', cu_val:'Cu', fe_val:'Fe', mn_val:'Mn', zn_val:'Zn' };
+
+  const resultados = {};
+  let temAlgum = false;
+
+  ids.forEach(id => {
+    const val = parseFloat(document.getElementById(id).value);
+    if (!isNaN(val) && val > 0) {
+      resultados[map[id]] = val;
+      temAlgum = true;
+    }
+  });
+
+  if (!temAlgum) {
+    document.getElementById('aviso-campos').classList.add('visivel');
+    return;
+  }
+  document.getElementById('aviso-campos').classList.remove('visivel');
+
+  document.getElementById('btn-rodar').disabled = true;
+  document.getElementById('loading-envio').style.display = 'block';
+
+  const payload = {
+    ...dadosLead,
+    ...Object.fromEntries(Object.entries(resultados).map(([k,v]) => [k, v]))
+  };
+
+  // Classificações para enviar também
+  Object.entries(resultados).forEach(([k, v]) => {
+    payload['class_' + k] = labelClasse(classificar(k, v));
+  });
+
+  enviarParaSheets(payload).finally(() => {
+    mostrarResultado(resultados);
+  });
+}
+
+async function enviarParaSheets(payload) {
+  if (!SCRIPT_URL || SCRIPT_URL.includes('COLE_A_URL')) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {
+    console.warn('Erro ao enviar para Sheets:', e);
+  }
+}
+
+function mostrarResultado(resultados) {
+  document.getElementById('loading-envio').style.display = 'none';
+
+  const grid = document.getElementById('resultado-grid');
+  grid.innerHTML = '';
+
+  let contBaixo = 0, contMedio = 0, contAdeq = 0, contElev = 0;
+
+  Object.entries(resultados).forEach(([nutriente, valor]) => {
+    const classe = classificar(nutriente, valor);
+    if (classe === 'baixo') contBaixo++;
+    else if (classe === 'medio') contMedio++;
+    else if (classe === 'adequado') contAdeq++;
+    else contElev++;
+
+    const item = document.createElement('div');
+    item.className = 'resultado-item ' + classe;
+    item.innerHTML = `
+      <div>
+        <span class="nome-n">${nutriente}</span>
+        <span class="valor-n">${valor} ${normas[nutriente].unit}</span>
+      </div>
+      <div class="badge ${classe}">${labelClasse(classe)}</div>
+    `;
+    grid.appendChild(item);
+  });
+
+  // Sumário
+  const total = Object.keys(resultados).length;
+  let texto = `<strong>${dadosLead.nome}</strong>, foram analisados <strong>${total}</strong> nutriente${total > 1 ? 's' : ''}. `;
+  if (contBaixo > 0) texto += `<strong>${contBaixo}</strong> estão <span style="color:#b91c1c">abaixo</span> do nível crítico. `;
+  if (contMedio > 0) texto += `<strong>${contMedio}</strong> em nível <span style="color:#92400e">médio</span>. `;
+  if (contAdeq > 0) texto += `<strong>${contAdeq}</strong> no nível <span style="color:#15803d">adequado</span>. `;
+  if (contElev > 0) texto += `<strong>${contElev}</strong> em nível <span style="color:#1e40af">elevado</span>.`;
+  document.getElementById('sumario-texto').innerHTML = texto;
+
+  document.getElementById('etapa-2').classList.remove('ativa');
+  document.getElementById('etapa-3').classList.add('ativa');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
